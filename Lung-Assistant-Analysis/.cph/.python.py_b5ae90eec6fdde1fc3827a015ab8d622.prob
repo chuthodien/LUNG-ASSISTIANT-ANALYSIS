@@ -1,0 +1,27 @@
+{
+    "name": "Local: python",
+    "url": "d:\\huynh-trong-nhan\\Lesson\\IDEA\\Chester-Assistant-Analysis\\python.py",
+    "tests": [
+        {
+            "id": 1647135712342,
+            "input": "2 5",
+            "output": "14"
+        },
+        {
+            "id": 1647135733506,
+            "input": "3 15",
+            "output": "159"
+        },
+        {
+            "id": 1647135745546,
+            "input": "3 45",
+            "output": "-1"
+        }
+    ],
+    "interactive": false,
+    "memoryLimit": 1024,
+    "timeLimit": 3000,
+    "srcPath": "d:\\huynh-trong-nhan\\Lesson\\IDEA\\Chester-Assistant-Analysis\\python.py",
+    "group": "local",
+    "local": true
+}

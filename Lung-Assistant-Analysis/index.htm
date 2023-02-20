@@ -1,0 +1,364 @@
+<html>
+<head>
+	<link rel="stylesheet" href="res/css/bootstrap-3.3.7.min.css">
+	<link rel="stylesheet" href="res/css/bootstrap-theme-3.3.7.min.css">
+	<link rel='stylesheet' href='res/css/style.css' type='text/css' media='all' />
+	<link rel="stylesheet" href="res/css/magnify.css">
+	
+	<title>Chester the AI Radiology Assistant</title>
+	
+	<meta name="viewport" content="width=1100, initial-scale=1.0">
+	<meta property="og:site_name" content="UTC2-Medicine AI Labs" />
+	<meta property="og:locale" content="vn_VN" />  
+	<meta property="og:type" content="article" />
+	<meta property="og:image" content="D:\huynh-trong-nhan\Lesson\IDEA\Chester-Assistant-Analysis\res\QEDU.png" />
+	
+	<meta name="twitter:card" content="summary"/>
+	<meta property="og:url" content="https://github.com/christopherohit/Lung-Assistant-Analysis" />
+	<meta property="og:title" content="UTC2-Medicine AI Labs" />
+	<meta property="og:description" content="Để thu hẹp khoảng cách giữa các nhà nghiên cứu AI và các chuyên gia y tế, tôi đã phát triển một hệ thống nguyên mẫu rất dễ tiếp cận mà các chuyên gia y tế có thể sử dụng để hiểu thực tế của các công cụ Deep Learning để chẩn đoán X-quang ngực." />
+	
+	<meta name="title" content="UTC2-Medicine AI Labs">
+	<meta name="description" content="Để thu hẹp khoảng cách giữa các nhà nghiên cứu AI và các chuyên gia y tế, tôi đã phát triển một hệ thống nguyên mẫu rất dễ tiếp cận mà các chuyên gia y tế có thể sử dụng để hiểu thực tế của các công cụ Deep Learning để chẩn đoán X-quang ngực."/>
+	<script async src="res/js/bootstrap-3.3.7.min.js"></script>
+	<script async src="res/js/magnify.js"></script>
+	<script async src="res/js/js-colormaps.js"></script>
+	<script async src="res/js/ssim.js"></script>
+	<script src="res/js/jquery-3.5.1.min.js"></script>
+	<script src="res/js/tf-2.0.1.min.js"></script>
+	
+	<script>
+	
+	function showAbout(){
+		$("#aboutbtn").addClass("active");
+		$(".about").show();
+		
+	}
+	
+	function hideAbout(){
+		$("#aboutbtn").removeClass("active");
+		$(".about").hide();
+		setCookie('about','about',9999);
+	}
+	
+	
+	$(function(){
+		
+		if (findGetParameter("local") != "true" && getCookie("about") != "about"){
+			showAbout();
+		}
+		
+		$("#aboutbtn").click(function(){
+			
+			if (!$(".about").is(":visible")){
+				showAbout();
+			}else{
+				hideAbout();
+			}
+		});
+		
+	});
+	
+	function setCookie(cname, cvalue, exdays) {
+	    var d = new Date();
+	    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+	    var expires = "expires="+ d.toUTCString();
+	    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+	}
+	
+	function getCookie(cname) {
+	    var name = cname + "=";
+	    var decodedCookie = decodeURIComponent(document.cookie);
+	    var ca = decodedCookie.split(';');
+	    for(var i = 0; i <ca.length; i++) {
+	        var c = ca[i];
+	        while (c.charAt(0) == ' ') {
+	            c = c.substring(1);
+	        }
+	        if (c.indexOf(name) == 0) {
+	            return c.substring(name.length, c.length);
+	        }
+	    }
+	    return "";
+	}
+	</script>
+	
+	
+	<script src="res/js/system.js?v=1.204"></script>
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	
+	  ga('create', 'UA-131584004-1', 'mlmed.org');
+	  ga('send', 'pageview');
+	</script>
+	
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top" style="background-color: darkgrey">
+		<div class="container">
+		  <div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+			  <span class="sr-only">Toggle navigation</span>
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>
+			  <span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand"><img style="width:100px;height:100px" src="res\Custom-Icon-Design-Pretty-Social-Media-2-Dzone-1.png"/></a>
+			<a class="navbar-brand" style="font-family: 'Times New Roman', Times, serif; color:white;">UTC2-Medicine AI Labs</a>
+			<a class="active navbar-brand" href="#lung" style="font-family: 'Times New Roman', Times, serif; color:white;">Diagnosis Lung</a>
+			<a class="navbar-brand" href="#" style="font-family: 'Times New Roman', Times, serif; color:white;">Diagnosis Brain</a>
+			<a class="navbar-brand" href="#" style="font-family: 'Times New Roman', Times, serif; color:white;">Diagnosis Skin</a>
+		  </div>
+		  <div id="navbar" class="navbar-collapse collapse">
+			<ul class="nav navbar-nav"></ul>
+			<ul class="nav navbar-nav navbar-right" style="background-color: darkgrey">
+			  <li id="aboutbtn" class = 'active'><a href="#">Thông tin ứng dụng</a></li>
+			</ul>
+		  </div>
+		</div>
+	  </nav>
+	<div class="container" style="width: 100%;min-width: 1024px;">
+
+
+	
+		<div class="col-sm-12" style="">
+		<div class="col-md-2"></div>
+<div class="col-md-8">
+
+          <div class="about" style="display:none;">
+            <h2 class="blog-post-title"><img src="D:\huynh-trong-nhan\Lesson\IDEA\Lung-Assistant-Analysis\res\images (1).png" style="height: 100px; width: 100px">Ứng Dụng và Phát Hiện Chuẩn Đoán Bệnh Phổi</h2>
+
+            <p>
+				Để thu hẹp khoảng cách giữa các nhà nghiên cứu Học tập sâu và các chuyên gia y tế, chúng tôi phát triển một hệ thống nguyên mẫu 
+				miễn phí rất dễ tiếp cận có thể được sử dụng bởi các chuyên gia y tế để hiểu thực tế của các công cụ Deep Learning để chẩn đoán 
+				X-quang ngực. Hệ thống là được thiết kế để trở thành ý kiến thứ hai trong đó người dùng có thể xử lý hình ảnh để xác nhận hoặc hỗ trợ
+				chẩn đoán. Mã và trọng lượng mạng được gửi qua một URL đến trình duyệt web (bao gồm điện thoại di động) nhưng dữ liệu bệnh nhân 
+				vẫn còn trên máy người dùng và tất cả quá trình xử lý xảy ra tại địa phương. Bài báo này thảo luận chi tiết về ba thành phần chính: 
+				ngoài phân phối phát hiện, dự đoán bệnh và giải thích dự đoán Hệ thống mã nguồn mở và có sẵn miễn phí  
+				<a href="https://github.com/christopherohit/Lung-Assistant-Analysis">ở đây</a>
+			</p>
+			
+			
+			<ol>
+			<li>Trình bày cách thức hoạt động của hệ thống AI và những hạn chế của chúng.</li>
+			<li>Cho thấy tiềm năng của dữ liệu mở (cần thiết để xây dựng một hệ thống phổ biến rộng rãi như thế này)</li>
+			<li>Là một công cụ có thể hoạt hỏi của các bác sĩ X-quang</li>
+			<li>Trình diễn một hệ thống phân phối mô hình có thể mở rộng quy mô để cung cấp các công cụ y tế miễn phí cho thế giới</li>
+			</ol>
+			<br>
+        
+        <center><a href="javascript:hideAbout();"><button type="button" class="btn btn-warning">hide this</button></a></center>
+          <hr>
+          </div>
+
+
+        </div>
+				
+		</div>
+
+<div class="col-sm-12">
+
+	<div class="alert alert-warning" role="alert" style="width: 100%">
+		<center>
+			KHÔNG ÁP DỤNG TRONG THỰC TẾ. Đây là một ý tưởng mô phỏng cách thức hoạt động
+			của AI và hướng áp dụng nó vào trong lĩnh vực y tế. Vì là thử nghiệm nên nó hoàn toàn
+			có lỗi trong quá trình chuẩn đoán. Tất cả quá trình xử lý được thực hiện trên của bạn
+			thiết bị và hình ảnh không được gửi đến máy chủ. Nếu bạn tiếp tục bạn
+			chịu mọi trách nhiệm khi sử dụng hệ thống. <span class="hideiflocal"></span>
+			<button id="agree" type="button" class="btn btn-danger">Đã hiểu</button>
+		</center>
+	</div>
+
+	<div class="col-sm-12">
+	<div style="float:right;">
+		<span style="font-size: 18px;" >Made by:
+		<a href="https://github.com/christopherohit"><img style="width:200px" src="res/Untitled Design.jpeg"/></a>
+		and
+		<a href="https://cs.uit.edu.vn/home-2/"><img style="width:150px" src="res/logo-uit.png"/></a>
+		</span>
+	</div>
+				
+	Thiết kế bởi: UTC2 @ILab 2022<br>
+	</div>
+
+	<div class="col-sm-12">
+		<div id="file-container" style="display: none">
+			Vui lòng chọn ảnh: <input type="file" id="files" name="files[]" multiple> 
+			<span class="hideiflocal"><a target="_blank" href="examples/">Tải Phiên Chuẩn Đoán Hiện Tại (NewTab)</a><br></span>
+			<a href="javascript:downloadCSV();">Tải Xuống Tất Cả Các Chuẩn Đoán Dưới Dạng CSV</a>
+		</div>
+	</div>
+	
+	<div class="col-sm-12">
+		<span id="info" style="color:red"></span>	
+		<center><div id="status" class="status"></div></center>
+	</div>
+	
+</div>
+
+		
+<div id="predictions">
+
+	<div id="predtemplate" class="prediction col-xs-12" style="display:none">
+		<div class="topbar">
+		<center><span class="imagename">&nbsp;</span></center>
+		</div>
+		<div class="col-xs-12" style="padding:0px;margin-bottom: 10px">
+		<div class="col-xs-8">
+<!-- 			<center style=""><b>Image</b> -->
+<center>
+  <div class="toolbar btn-group">
+      <button class="btn btn-default btn-invert-colors" data-original-title="Invert colors">
+		<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-circle-half" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+		  <path fill-rule="evenodd" d="M8 15V1a7 7 0 1 1 0 14zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"/>
+		</svg> Invert colors
+	  </button>
+      <button class="btn btn-default btn-raw-gradients" data-original-title="raw gradients">
+      	<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-cpu" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+		  <path fill-rule="evenodd" d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0zm-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3h-7zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5v-3zM6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/>
+		</svg> Raw Gradients
+	  </button>
+      <button class="btn btn-default btn-reset-layers" data-original-title="reset layers">
+      	<svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-layers" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+		  <path fill-rule="evenodd" d="M3.188 8L.264 9.559a.5.5 0 0 0 0 .882l7.5 4a.5.5 0 0 0 .47 0l7.5-4a.5.5 0 0 0 0-.882L12.813 8l-1.063.567L14.438 10 8 13.433 1.562 10 4.25 8.567 3.187 8z"/>
+		  <path fill-rule="evenodd" d="M7.765 1.559a.5.5 0 0 1 .47 0l7.5 4a.5.5 0 0 1 0 .882l-7.5 4a.5.5 0 0 1-.47 0l-7.5-4a.5.5 0 0 1 0-.882l7.5-4zM1.563 6L8 9.433 14.438 6 8 2.567 1.562 6z"/>
+		</svg> Reset layers
+	  </button>
+  </div>
+</center>
+		</div>
+		<div class="col-xs-4">
+			<center style=""><b>Rủi ro bệnh lý</b>
+			<br><span style="font-size: x-small">Vùng trung tâm màu trắng cho biết rằng mô hình không chắc chắn.</span>
+			</center>
+		</div>
+		</div>
+		
+		<div class="col-xs-8" style="">
+			<div class="viewbox">
+				<canvas class="layer inputimage_highres baselayer"></canvas>
+				<canvas class="layer inputimage" style="display:none;"></canvas>
+				<canvas class="layer inputimage_rec" style="display:none;"></canvas>
+				<canvas class="layer recimage" style="display:none;"></canvas>
+				<canvas class="layer oodimage" style="opacity: 0.5;display:none;"></canvas>
+				<canvas class="layer gradimage" style="filter:blur(0.89rem)"></canvas>
+				<center class="layer loading" style="display:none;margin-top:5%;width:100%;"><img style="width:400px;" alt="Loading..." src="res/loading1.gif"/></center>
+			</div>
+			<center><span class="desc"></span></center>
+			</span>
+			
+			<center>
+				<button style="display:none" type="button" class="oodtoggle btn btn-danger btn-xs">
+				Hiển thị bản đồ nhiệt OOD
+				</button>
+			</center>
+				
+<!-- 			<center><div style="margin-top:40%;display:none" class="computegrads"></div></center> -->
+			
+		</div>
+		<div class="col-xs-4 predviz">
+		<center class="loading"><img style="margin-top:40%;" alt="Loading..." src="https://i.gifer.com/7plQ.gif"/></center>
+		
+		<center>
+		<div class="predbox" style="width:100%">
+
+		</div>
+		</center>
+		</div>
+		</div>
+		<hr>
+	</div>
+
+
+</div>	
+<img id="defaultImage" src="examples/f410057190635755d60158d1595d67_jumbo-1.jpeg" style="display:none" />
+		
+</div>
+</body>
+
+<canvas id="zoom" width="100" height="50" style="width:400px; height:200px;position:absolute; top:0; left:0; display:none;image-rendering:pixelated"></canvas>
+
+<script>
+let statusElement;
+let status;
+
+$(function(){
+	statusElement = document.getElementById('status');
+	
+	status = function(msg){statusElement.innerText = msg;console.log("Status: " + msg)};
+});
+
+$(function(){
+	testBrowser();
+	$("#agree").click(function(){
+		$("#agree").hide()
+		run();
+	});
+	
+	if (findGetParameter("accept") == "true"){
+		$("#agree").hide()
+		hideAbout()
+		run();
+	}
+});
+
+function testBrowser(){
+	
+	try{
+		new Promise(function(resolve){setTimeout(resolve, 1)});
+	}catch(err) {
+		status("Error! Your browser may be unsupported. (" + err.message + ")");
+		console.log(err)
+	}
+}
+
+</script>
+
+
+<br>
+
+<center>
+<br>
+<div class = "row justify-content-center" >
+	<div class = "col-auto">
+		<table class="table table-responsive" >
+			<tr>
+				<th class="tg-baqh" style="text-align: center;" colspan="2">System Information</th>
+			</tr>
+			<tr>
+				<td scope="col" >Mô Hình Chuẩn Đoán</td>
+				<td scope="col">DenseNet-121 (Input 224x224) (TorchXRayVision)</td>
+			</tr>
+			<tr>
+				<td scope="col" >Tập Dữ Liệu Huấn Luyện</td>
+				<td scope="col">NIH, PadChest, RSNA Pnuemonia, CheXpert, MIMIC-CXR</td>
+			</tr>
+			<tr>
+				<td scope="col">Data sent off device</td>
+				<td scope="col">No</td>
+			</tr>
+			</table>
+	</div>
+</div>
+
+
+
+<br><br>
+
+<div class="row justify-content-center">
+	<h5 lang="vn">Chúng tôi xin chân thành cảm ơn sự hỗ trợ về mặt kiến thức của quý thầy cô trong quá trình hoàn thiện sản phẩm này</h5>
+	<h5 lang="vn">Đặc biệt xin gửi lời cảm ơn sâu sắc nhất đến thầy Nguyễn Đình Hiển, Thầy Trần Ngọc Đăng Nguyên, Thầy Linh Nguyễn, Cô Phạm Thị Miên và Team UTC2 @iLab</h5>
+	<h5 lang="vn">Đã dốc hết sức nghiên cứu và phát triển cho ý tưởng này.</h5>
+</div>
+
+
+</center>
+
+<a class="hideiflocal" href="https://github.com/christopherohit/Lung-Assistant-Analysis/issues" id="chat-link" target="_blank"><i class="glyphicon glyphicon-envelope"></i>Phản Hồi Với Chúng Tôi</a>
+
+
+</html>
